@@ -32,7 +32,12 @@ app.use(cors({
 // because path-to-regexp no longer supports bare '*' wildcards.
 app.use(express.json());
 
+// Serve uploaded images statically
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Import Routes
+
 const authRoutes = require('./routes/auth');
 const farmerRoutes = require('./routes/farmer');
 const consumerRoutes = require('./routes/consumer');

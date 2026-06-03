@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 // FarmerDashboard – receives activeTab from App.jsx via Sidebar
-import { Package, ClipboardList, TrendingUp, PlusCircle, Edit2, Trash2, X, IndianRupee, BoxIcon } from 'lucide-react';
+import { Package, ClipboardList, TrendingUp, PlusCircle, Edit2, Trash2, X, IndianRupee, BoxIcon, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
@@ -14,10 +14,49 @@ const STATUS_BADGE = {
 };
 
 function ProductModal({ onClose, onSaved, editing }) {
-  const [form, setForm] = useState(editing || { name: '', category: '', description: '', price: '', unit: 'kg', stock: '' });
+  const [form, setForm] = useState(editing || { name: '', category: '', description: '', price: '', unit: 'kg', stock: '', images: [] });
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setUploadingImage(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(api.defaults.baseURL + '/farmer/upload-image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // Deliberately not setting Content-Type so the browser sets the correct multipart boundary
+        },
+        body: formData
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Upload endpoint not found. Please RESTART your servers!');
+        }
+        throw new Error(data?.message || `Server error: ${response.status}`);
+      }
+
+      setForm(f => ({ ...f, images: [data.url] }));
+      toast.success('Image uploaded successfully');
+    } catch (err) {
+      console.error('Upload Error:', err);
+      toast.error(err.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,6 +118,55 @@ function ProductModal({ onClose, onSaved, editing }) {
           <div className="form-group">
             <label className="form-label">Description</label>
             <textarea className="form-input" name="description" value={form.description} onChange={handleChange} placeholder="Fresh, organically grown..." rows={2} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Product Image</label>
+            <div style={{
+              border: '1px dashed var(--border-light)',
+              borderRadius: '8px',
+              padding: '16px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'var(--bg-elevated)',
+              position: 'relative'
+            }}>
+              {form.images?.[0] ? (
+                <>
+                  <img src={api.defaults.baseURL.replace('/api', '') + form.images[0]} alt="Preview" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '4px' }} />
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, images: [] }))}
+                    className="btn btn-sm btn-danger"
+                    style={{ position: 'absolute', top: '24px', right: '24px' }}
+                  >
+                    <X size={12} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Upload size={24} style={{ color: 'var(--text-muted)' }} />
+                  <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                    {uploadingImage ? 'Uploading...' : 'Click to upload a product image'}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      opacity: 0,
+                      cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                      width: '100%'
+                    }}
+                  />
+                </>
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
@@ -243,7 +331,7 @@ export default function FarmerDashboard({ activeTab = 'dashboard' }) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <div style={{
                             width: '48px', height: '48px', borderRadius: '10px', flexShrink: 0,
-                            backgroundImage: p.images?.[0] ? `url(${p.images[0]})` : 'none',
+                            backgroundImage: p.images?.[0] ? `url(${api.defaults.baseURL.replace('/api', '') + p.images[0]})` : 'none',
                             backgroundSize: 'cover', backgroundPosition: 'center',
                             background: p.images?.[0] ? undefined : 'var(--bg-elevated)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',

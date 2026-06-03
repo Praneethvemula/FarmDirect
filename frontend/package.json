@@ -1,8 +1,14 @@
 {
-  "name": "frontend",
+  "name": "farmdirect-client",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "FarmDirect — React/Vite frontend for the agricultural marketplace",
   "type": "module",
+  "keywords": ["farmdirect", "agriculture", "react", "vite"],
+  "author": "Praneeth Vemula",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

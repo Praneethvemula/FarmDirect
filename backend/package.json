@@ -1,16 +1,28 @@
 {
-  "name": "backend",
+  "name": "farmdirect-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "FarmDirect — Node/Express REST API with MySQL & Sequelize",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed-admin": "node seed-admin.js",
+    "seed-products": "node seed-products.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "farmdirect",
+    "agriculture",
+    "api",
+    "express",
+    "mysql"
+  ],
+  "author": "Praneeth Vemula",
   "license": "ISC",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -18,9 +30,13 @@
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
     "mysql2": "^3.20.0",
     "razorpay": "^2.9.6",
     "sequelize": "^6.37.8",
     "stripe": "^22.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
