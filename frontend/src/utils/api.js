@@ -1,10 +1,13 @@
 import axios from 'axios';
 
-// Use relative path '/api' so requests go through the Vite dev proxy.
-// This avoids CORS issues caused by calling http://localhost:5000 directly
-// from the browser. The Vite proxy (vite.config.js) forwards /api → http://localhost:5000
+// In development, use the Vite proxy ('/api' → http://localhost:5000).
+// In production (Vercel), use the deployed backend URL from the env var.
+const baseURL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
 });
 

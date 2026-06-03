@@ -8,14 +8,20 @@ dotenv.config();
 
 const app = express();
 
-// Explicit CORS: allow requests from the Vite dev server and any localhost port
+// Explicit CORS: allow requests from the Vite dev server and production frontend
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+];
+// Add production frontend URL if set (e.g. https://farm-direct.vercel.app)
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5173',
-  ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
